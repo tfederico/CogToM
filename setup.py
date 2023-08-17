@@ -1,10 +1,7 @@
 import pathlib
 import setuptools
 
-
-
 PACKAGE_DIR = pathlib.Path(__file__).absolute().parent
-
 
 
 def get_version():
@@ -19,6 +16,7 @@ def get_version():
             return line.strip().split()[-1].strip().strip("'")
 
     raise RuntimeError("bad version data in __init__.py")
+
 
 def get_description():
     """
@@ -35,6 +33,7 @@ def get_description():
             else:
                 break
     return long_description
+
 
 setuptools.setup(
     name='cogtom',

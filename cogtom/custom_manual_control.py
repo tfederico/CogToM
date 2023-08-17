@@ -36,3 +36,18 @@ class CustomManualControl(ManualControl):
             self.step(action)
         else:
             print(key)
+
+    def step(self, action: Actions):
+        obs, reward, terminated, truncated, _ = self.env.step(action)
+        print(f"step={self.env.step_count}, reward={reward:.2f}")
+        decoded_obs = self.env.grid.decode(obs["image"])
+        print(self.env.grid.decode(obs["image"]))
+
+        if terminated:
+            print("terminated!")
+            self.reset(self.seed)
+        elif truncated:
+            print("truncated!")
+            self.reset(self.seed)
+        else:
+            self.env.render()

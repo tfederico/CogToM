@@ -12,7 +12,7 @@ import pygame.freetype
 from gymnasium import spaces
 from gymnasium.core import ActType, ObsType
 
-from cogtom.core import Actions
+from cogtom.core.actions import Actions
 from minigrid.core.constants import COLOR_NAMES, TILE_PIXELS
 from cogtom.core.custom_grid import CustomGrid
 from minigrid.core.mission import MissionSpace
@@ -69,7 +69,7 @@ class CustomMiniGridEnv(gym.Env):
 
         # Observations are dictionaries containing an
         # encoding of the grid and a textual 'mission' string
-        image_observation_space = spaces.Box(
+        image_observation_space = spaces.Box(                       # TODO: consider using gym.spaces.MultiDiscrete
             low=0,
             high=255,
             shape=(self.agent_view_size, self.agent_view_size, 3),
@@ -218,12 +218,11 @@ class CustomMiniGridEnv(gym.Env):
     def _gen_grid(self, width, height):
         pass
 
-    def _reward(self) -> float:
+    def _reward(self, action) -> tuple[float, bool, dict]:
         """
         Compute the reward to be given upon success
         """
-
-        return 1 - 0.9 * (self.step_count / self.max_steps)
+        pass
 
     def _rand_int(self, low: int, high: int) -> int:
         """
@@ -459,24 +458,11 @@ class CustomMiniGridEnv(gym.Env):
         terminated = False
         truncated = False
 
-        if action in [self.actions.up, self.actions.down, self.actions.left, self.actions.right]:
-
-            fwd_pos = tuple(map(sum, zip(self.agent_pos, Actions.get_action_vector(action))))
-            fwd_cell = self.grid.get(*fwd_pos)
-
-            if fwd_cell is None or fwd_cell.can_overlap():
-                self.agent_pos = fwd_pos
-
-            if fwd_cell is not None and fwd_cell.type == "goal":
-                terminated = True
-                reward = self._reward()
-            if fwd_cell is not None and fwd_cell.type == "lava":
-                terminated = True
-
+        if action in set(Actions):
+            reward, terminated, info = self._reward(action)
         # Done action (not used by default)
         elif action == self.actions.done:
             pass
-
         else:
             raise ValueError(f"Unknown action: {action}")
 
@@ -504,7 +490,7 @@ class CustomMiniGridEnv(gym.Env):
 
         grid = self.grid.slice(topX, topY, agent_view_size, agent_view_size)
 
-        vis_mask = np.ones(shape=(grid.width, grid.height), dtype=bool)
+        vis_mask = np.ones(shape=(grid.width, grid.height), dtype=bool)  # all visible by default
 
         agent_pos = grid.width // 2, grid.height // 2
 

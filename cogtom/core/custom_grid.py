@@ -134,7 +134,7 @@ class CustomGrid:
 
                 if 0 <= x < self.width and 0 <= y < self.height:
                     v = self.get(x, y)
-                else:
+                else:                                               # TODO: consider whether to use Wall() or None
                     v = Wall()
 
                 grid.set(i, j, v)
@@ -166,7 +166,7 @@ class CustomGrid:
         )
 
         # Draw the grid lines (top and left edges)
-        fill_coords(img, point_in_rect(0, 0.031, 0, 1), (100, 100, 100))
+        fill_coords(img, point_in_rect(0, 0.031, 0, 1), (100, 100, 100))  # 0.031 is the width of the grid line
         fill_coords(img, point_in_rect(0, 1, 0, 0.031), (100, 100, 100))
 
         if obj is not None:
