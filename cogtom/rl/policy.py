@@ -14,13 +14,13 @@ class Policy:
         discount_factor: float = 0.95,
     ):
         """Initialize a Reinforcement Learning agent with an empty dictionary
-        of state-action values (q_values), a learning rate and an epsilon.
+        of state-action values (q_values), a learning rate and an EPSILON.
 
         Args:
             learning_rate: The learning rate
-            epsilon: The initial epsilon value
-            epsilon_decay: The decay for epsilon
-            final_epsilon: The final epsilon value
+            epsilon: The initial EPSILON value
+            epsilon_decay: The decay for EPSILON
+            final_epsilon: The final EPSILON value
             discount_factor: The discount factor for computing the Q-value
         """
 
@@ -48,14 +48,14 @@ class Policy:
 
     def get_action(self, action_space: Space, current_pos: int) -> int:
         """
-        Returns the best action with probability (1 - epsilon)
-        otherwise a random action with probability epsilon to ensure exploration.
+        Returns the best action with probability (1 - EPSILON)
+        otherwise a random action with probability EPSILON to ensure exploration.
         """
 
-        # with probability epsilon return a random action to explore the environment
+        # with probability EPSILON return a random action to explore the environment
         if np.random.uniform(0, 1) < self.epsilon:
             return action_space.sample()
-        # with probability (1 - epsilon) act greedily (exploit)
+        # with probability (1 - EPSILON) act greedily (exploit)
         else:
             action_argmax = np.argwhere(self.q_values[current_pos] == np.amax(self.q_values[current_pos]))
             return int(np.random.choice(action_argmax.flatten()))

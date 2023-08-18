@@ -3,17 +3,18 @@ import gymnasium as gym
 from cogtom.core.actions import Actions
 import numpy as np
 import time
-from matplotlib import pyplot as plt
-# reduce font size
-plt.rcParams.update({'font.size': 12})
+from cogtom.utils.plotting import plot_q_table
+
+
+MAX_STEPS = 30
+SIZE = 11
 
 
 def test():
-
     with open("goal_map.json", "r") as f:
         goal_map = json.load(f)
 
-    env = gym.make("SimpleEnv-v1", render_mode="human", size=11, goal_map=goal_map)
+    env = gym.make("SimpleEnv-v1", render_mode="human", size=SIZE, max_steps=MAX_STEPS, goal_map=goal_map)
     env.reset()
 
     # load q-table
@@ -38,22 +39,7 @@ def test():
 
     print("Cumulated reward: ", cumulated_reward)
 
-    # plot the q-table
-    plt.imshow(np.swapaxes(np.array(list(q_table.values())).reshape(11, 11, 4), 1, 0).max(axis=2))
-    # write the value of the best action in each state and the corresponding string using argmax
-    for i, (k, v) in enumerate(q_table.items()):
-        plt.text(
-            i // 11,
-            i % 11,
-            f"{round(v[np.argmax(v)], 2)}: {Actions(np.argmax(v)).name}",
-            ha="center",
-            va="center",
-            color="white",
-        )
-    # plot the legend
-    plt.colorbar(ticks=range(4))
-
-    plt.show()
+    plot_q_table(q_table, SIZE)
 
 
 if __name__ == "__main__":

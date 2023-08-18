@@ -302,7 +302,7 @@ class CustomMiniGridEnv(gym.Env):
         Place an object at an empty position in the grid
 
         :param top: top-left position of the rectangle where to place
-        :param size: size of the rectangle where to place
+        :param size: SIZE of the rectangle where to place
         :param reject_fn: function to filter out potential positions
         """
 
@@ -375,14 +375,14 @@ class CustomMiniGridEnv(gym.Env):
         """
         Translate and rotate absolute grid coordinates (i, j) into the
         agent's partially observable view (sub-grid). Note that the resulting
-        coordinates may be negative or outside of the agent's view size.
+        coordinates may be negative or outside of the agent's view SIZE.
         """
 
         ax, ay = self.agent_pos
 
         # Compute the absolute coordinates of the top-left view corner
-        sz = self.agent_view_size  # size
-        hs = sz // 2  # half-size
+        sz = self.agent_view_size  # SIZE
+        hs = sz // 2  # half-SIZE
         tx = ax - hs
         ty = ay - hs
 
@@ -457,6 +457,9 @@ class CustomMiniGridEnv(gym.Env):
         reward = 0
         terminated = False
         truncated = False
+        info = {
+            "consumed_goal": None
+        }
 
         if action in set(Actions):
             reward, terminated, info = self._reward(action)
@@ -474,7 +477,7 @@ class CustomMiniGridEnv(gym.Env):
 
         obs = self.gen_obs()
 
-        return obs, reward, terminated, truncated, {}
+        return obs, reward, terminated, truncated, info
 
     def gen_obs_grid(self, agent_view_size=None):
         """

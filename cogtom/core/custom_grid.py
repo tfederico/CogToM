@@ -209,13 +209,13 @@ class CustomGrid:
         """
         Render this grid at a given scale
         :param r: target renderer object
-        :param tile_size: tile size in pixels
+        :param tile_size: tile SIZE in pixels
         """
 
         if highlight_mask is None:
             highlight_mask = np.zeros(shape=(self.width, self.height), dtype=bool)
 
-        # Compute the total grid size
+        # Compute the total grid SIZE
         width_px = self.width * tile_size
         height_px = self.height * tile_size
 

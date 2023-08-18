@@ -23,9 +23,6 @@ class SimpleEnv(CustomMiniGridEnv):
         assert all([g in COLOR_NAMES for g in goal_map.keys()])
         self.goal_map = goal_map
 
-        if max_steps is None:
-            max_steps = 31
-
         super().__init__(
             mission_space=mission_space,
             grid_size=size,
@@ -57,7 +54,6 @@ class SimpleEnv(CustomMiniGridEnv):
         # Place the agent
         if self.agent_start_pos is not None:
             self.agent_pos = self.agent_start_pos
-            self.agent_prev_pos = self.agent_start_pos
         else:
             self.place_agent()
 
@@ -83,7 +79,6 @@ class SimpleEnv(CustomMiniGridEnv):
         if fwd_cell is not None and fwd_cell.type == "goal":
             reward = self.goal_map[fwd_cell.color]["reward"]
             info["consumed_goal"] = fwd_cell.color
-            # TODO: remove from GUI
             terminated = True
 
         return reward, terminated, info
