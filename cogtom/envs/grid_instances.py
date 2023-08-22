@@ -44,7 +44,12 @@ class SimpleEnv(CustomMiniGridEnv):
         # Generate the surrounding walls
         self.grid.wall_rect(0, 0, width, height)
 
+        # TODO generate random walls
+
+
+        # Place the goals
         for color in self.goal_map.keys():
+            # TODO replace position with random
             self.put_obj(
                 Goal(color),
                 self.goal_map[color]["pos"][0],

@@ -34,17 +34,17 @@ class Policy:
         self.training_error = []
 
     def init_q_table(self, env_width: int, env_height: int, action_space_n: int):
-        for i in range(env_width):
-            for j in range(env_height):
+        for i in range(1, env_width - 1):
+            for j in range(1, env_height - 1):
                 self.q_values[(i, j)] = np.zeros(action_space_n)
 
-        # initialize the q_values for the walls to -inf
-        for i in range(env_width):
-            self.q_values[(i, 0)][Actions.up] = -np.inf
-            self.q_values[(i, env_height - 1)][Actions.down] = -np.inf
-        for j in range(env_height):
-            self.q_values[(0, j)][Actions.left] = -np.inf
-            self.q_values[(env_width - 1, j)][Actions.right] = -np.inf
+        # # initialize the q_values for the walls to -inf
+        # for i in range(env_width):
+        #     self.q_values[(i, 0)][Actions.up] = -np.inf
+        #     self.q_values[(i, env_height - 1)][Actions.down] = -np.inf
+        # for j in range(env_height):
+        #     self.q_values[(0, j)][Actions.left] = -np.inf
+        #     self.q_values[(env_width - 1, j)][Actions.right] = -np.inf
 
     def get_action(self, action_space: Space, current_pos: int) -> int:
         """

@@ -37,12 +37,12 @@ def plot_training_results(env, policy):
 
 def plot_q_table(q_table, size):
     # plot the q-table
-    plt.imshow(np.swapaxes(np.array(list(q_table.values())).reshape(11, 11, 4), 1, 0).max(axis=2))
+    plt.imshow(np.swapaxes(np.array(list(q_table.values())).reshape(size - 2, size - 2, 4), 1, 0).max(axis=2))
     # write the value of the best action in each state and the corresponding string using argmax
     for i, (k, v) in enumerate(q_table.items()):
         plt.text(
-            i // size,
-            i % size,
+            i // (size - 2),
+            i % (size - 2),
             f"{round(v[np.argmax(v)], 2)} \n {Actions(np.argmax(v)).name}",
             ha="center",
             va="center",

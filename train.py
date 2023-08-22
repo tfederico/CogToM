@@ -48,7 +48,7 @@ def train_agent(env, policy):
     for _ in tqdm(range(N_EPISODES)):
         env.reset()
         first_action, consumed_goal = train_one_episode(env, policy)
-        consumed_goals.append(consumed_goal if consumed_goal is not None else -1)
+        consumed_goals.append(consumed_goal)
         first_actions.append(first_action)
 
     if len(consumed_goals) > 0:
@@ -79,6 +79,8 @@ def train():
     for a in range(N_AGENTS):
 
         env.reset()
+        # TODO: generate new world
+
         policy.init_q_table(env.width, env.height, env.action_space.n)
         for _ in range(N_PAST):
             # reset position of the agent
@@ -87,6 +89,11 @@ def train():
             goal_consumed_rate += rate/N_PAST
         # plot_training_results(env, policy)
 
+        outcome_observed = np.zeros(num_goal)
+        g = np.argmax(goal_consumed_rate)
+        outcome_observed[g] = 1
+
+        print("Outcome observed: ", outcome_observed)
         # # enable manual control for testing
         # manual_control = CustomManualControl(env, seed=42)
         # manual_control.start()
