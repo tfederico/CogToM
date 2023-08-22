@@ -80,8 +80,9 @@ def train():
 
         env.reset()
         policy.init_q_table(env.width, env.height, env.action_space.n)
-
         for _ in range(N_PAST):
+            # reset position of the agent
+            env.place_agent((1, 1)) # TODO: replace with initial position
             env, policy, first_actions, rate = train_agent(env, policy)
             goal_consumed_rate += rate/N_PAST
         # plot_training_results(env, policy)

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from cogtom.core.actions import Actions
 # reduce font SIZE
-plt.rcParams.update({'font.SIZE': 12})
+plt.rcParams.update({'font.size': 12})
 
 
 def plot_training_results(env, policy):
