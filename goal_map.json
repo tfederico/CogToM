@@ -1,1 +1,1 @@
-{"blue": {"reward": 0.99, "pos": [4, 6]}, "green": {"reward": 0.005, "pos": [2, 6]}, "yellow": {"reward": 0.005, "pos": [4, 4]}}
+{"blue": {"reward": 0.99}, "green": {"reward": 0.005}, "yellow": {"reward": 0.005}}

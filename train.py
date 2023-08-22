@@ -78,8 +78,7 @@ def train():
 
     for a in range(N_AGENTS):
 
-        env.reset()
-        # TODO: generate new world
+        env.reset(hard_reset=True)
 
         policy.init_q_table(env.width, env.height, env.action_space.n)
         for _ in range(N_PAST):

@@ -6,13 +6,14 @@ from cogtom.envs.custom_env import CustomMiniGridEnv
 from minigrid.core.constants import COLOR_NAMES
 from gymnasium.core import ObsType
 from typing import Any
+import numpy as np
 
 
 class SimpleEnv(CustomMiniGridEnv):
     def __init__(
             self,
             size=10,
-            agent_start_pos=(1, 1),
+            agent_start_pos=None,
             agent_view_size=3,
             max_steps: int | None = None,
             goal_map=None,
@@ -37,32 +38,39 @@ class SimpleEnv(CustomMiniGridEnv):
     def _gen_mission():
         return "CogTom"
 
-    def _gen_grid(self, width, height):
-        # Create an empty grid
-        self.grid = CustomGrid(width, height)
+    def _gen_grid(self, width: int, height: int, hard_reset: bool = False):
 
-        # Generate the surrounding walls
-        self.grid.wall_rect(0, 0, width, height)
+        if hard_reset:
+            # Create an empty grid
+            self.grid = CustomGrid(width, height)
+            # Generate the surrounding walls
+            self.grid.wall_rect(0, 0, width, height)
 
-        # TODO generate random walls
+            # TODO generate random walls
+            num_blocks = np.random.randint(1, 4)
+            for _ in range(num_blocks):
+                # 50% chance of a vertical wall
+                if np.random.uniform() > 0.5:
+                    x = np.random.randint(1, width - 2)
+                    y1 = np.random.randint(1, height - 2)
+                    y2 = np.random.randint(1, height - 2)
+                    self.grid.vert_wall(x, min(y1, y2), abs(y2 - y1) + 1)
+                else:
+                    y = np.random.randint(1, height - 2)
+                    x1 = np.random.randint(1, width - 2)
+                    x2 = np.random.randint(1, width - 2)
+                    self.grid.horz_wall(min(x1, x2), y, abs(x2 - x1) + 1)
 
 
-        # Place the goals
-        for color in self.goal_map.keys():
-            # TODO replace position with random
-            self.put_obj(
-                Goal(color),
-                self.goal_map[color]["pos"][0],
-                self.goal_map[color]["pos"][1]
-            )
+            # Place the goals
+            for color in self.goal_map.keys():
+                self.place_obj(Goal(color))
+
+            self.mission = self._gen_mission()
 
         # Place the agent
-        if self.agent_start_pos is not None:
-            self.agent_pos = self.agent_start_pos
-        else:
-            self.place_agent()
+        self.place_agent()
 
-        self.mission = self._gen_mission()
 
     def _reward(self, action) -> tuple[float, bool, dict]:
         reward = 0

@@ -116,6 +116,7 @@ class CustomMiniGridEnv(gym.Env):
     def reset(
         self,
         *,
+        hard_reset: bool = False,
         seed: int | None = None,
         options: dict[str, Any] | None = None,
     ) -> tuple[ObsType, dict[str, Any]]:
@@ -124,8 +125,8 @@ class CustomMiniGridEnv(gym.Env):
         # Reinitialize episode-specific variables
         self.agent_pos = (-1, -1)
 
-        # Generate a new random grid at the start of each episode
-        self._gen_grid(self.width, self.height)
+        # Generate a new random grid
+        self._gen_grid(self.width, self.height, hard_reset=hard_reset)
 
         # These fields should be defined by _gen_grid
         assert (
@@ -215,7 +216,7 @@ class CustomMiniGridEnv(gym.Env):
         return output
 
     @abstractmethod
-    def _gen_grid(self, width, height):
+    def _gen_grid(self, width: int, height: int, hard_reset: bool = False):
         pass
 
     def _reward(self, action) -> tuple[float, bool, dict]:
