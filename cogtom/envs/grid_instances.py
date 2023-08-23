@@ -68,9 +68,7 @@ class SimpleEnv(CustomMiniGridEnv):
         # Place the agent in random position
         self.place_agent()
 
-
-
-    def _reward(self, action) -> tuple[float, bool, dict]:
+    def _reward(self, action: Actions) -> tuple[float, bool, dict]:
         reward = 0
         terminated = False
         info = {

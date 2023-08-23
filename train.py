@@ -6,6 +6,7 @@ from tqdm import tqdm
 import json
 from cogtom.utils.saving import save_q_table, save_gridworld, save_q_table_image
 from cogtom.utils.plotting import plot_training_results, plot_q_table
+from gymnasium import Env
 
 # hyperparameters
 LR = 0.1
@@ -18,7 +19,7 @@ N_AGENTS = 100
 N_PAST = 1
 
 
-def train_one_episode(env, policy):
+def train_one_episode(env: Env, policy: Policy) -> tuple[list, int]:
     done = False
     trajectory = []
     # play one episode
@@ -42,7 +43,7 @@ def train_one_episode(env, policy):
     return trajectory, info["consumed_goal"]
 
 
-def train_agent(env, policy):
+def train_agent(env: Env, policy: Policy) -> tuple[Env, Policy, list, list]:
     # env = gym.wrappers.RecordEpisodeStatistics(env, deque_size=N_EPISODES)
     trajectories = []
     consumed_goals = []
@@ -61,7 +62,7 @@ def train_agent(env, policy):
     return env, policy, trajectories, rate
 
 
-def extract_trajecotory(init_pos, env, q_table):
+def extract_trajecotory(init_pos: tuple, env: Env, q_table: dict) -> tuple[list, int]:
     trajectory = []
     pos = init_pos
     env.reset()

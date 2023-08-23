@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from cogtom.core.actions import Actions
+from gymnasium import Env
+from cogtom.rl.policy import Policy
 # reduce font SIZE
 plt.rcParams.update({'font.size': 12})
 
 
-def plot_training_results(env, policy):
+def plot_training_results(env: Env, policy: Policy):
     rolling_length = 50
     fig, axs = plt.subplots(ncols=3, figsize=(12, 5))
     axs[0].set_title("Episode rewards")
@@ -35,7 +37,7 @@ def plot_training_results(env, policy):
     plt.show()
 
 
-def plot_q_table(q_table, size):
+def plot_q_table(q_table: dict, size: int):
     # plot the q-table
     plt.imshow(np.swapaxes(np.array(list(q_table.values())).reshape(size - 2, size - 2, 4), 1, 0).max(axis=2))
     # write the value of the best action in each state and the corresponding string using argmax

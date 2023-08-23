@@ -3,9 +3,9 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import numpy as np
 from cogtom.core.actions import Actions
+from gymnasium import Env
 
-
-def save_q_table(q_values, path):
+def save_q_table(q_values: dict, path: str):
     # convert q-table keys to string for json serialization
     q_values_str = {str(k): v.tolist() for k, v in q_values.items()}
     # save the q-table
@@ -13,14 +13,14 @@ def save_q_table(q_values, path):
         json.dump(q_values_str, f)
 
 
-def save_gridworld(path, env):
+def save_gridworld(path: str, env: Env):
     # save the gridworld as an image
     img = env.render()
     img = Image.fromarray(img)
     img.save(path)
 
 
-def save_q_table_image(path, q_table, size):
+def save_q_table_image(path: str, q_table: dict, size: int):
 
     plt.imshow(np.swapaxes(np.array(list(q_table.values())).reshape(size - 2, size - 2, 4), 1, 0).max(axis=2))
     # write the value of the best action in each state and the corresponding string using argmax
