@@ -113,6 +113,8 @@ class CustomMiniGridEnv(gym.Env):
         self.tile_size = tile_size
         self.agent_pov = agent_pov
 
+        self.agent_init_pos = (-1, 1)
+
     def reset(
         self,
         *,
@@ -125,8 +127,12 @@ class CustomMiniGridEnv(gym.Env):
         # Reinitialize episode-specific variables
         self.agent_pos = (-1, -1)
 
-        # Generate a new random grid
-        self._gen_grid(self.width, self.height, hard_reset=hard_reset)
+        if hard_reset:
+            # Generate a new random grid
+            self._gen_grid(self.width, self.height)
+            self.agent_init_pos = self.agent_pos
+        else:
+            self.agent_pos = self.agent_init_pos
 
         # These fields should be defined by _gen_grid
         assert (

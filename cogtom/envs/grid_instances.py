@@ -13,13 +13,12 @@ class SimpleEnv(CustomMiniGridEnv):
     def __init__(
             self,
             size=10,
-            agent_start_pos=None,
             agent_view_size=3,
             max_steps: int | None = None,
             goal_map=None,
             **kwargs,
     ):
-        self.agent_start_pos = agent_start_pos
+        self.agent_pos = (-1, -1)
         mission_space = MissionSpace(mission_func=self._gen_mission)
         assert all([g in COLOR_NAMES for g in goal_map.keys()])
         self.goal_map = goal_map
@@ -38,38 +37,37 @@ class SimpleEnv(CustomMiniGridEnv):
     def _gen_mission():
         return "CogTom"
 
-    def _gen_grid(self, width: int, height: int, hard_reset: bool = False):
+    def _gen_grid(self, width: int, height: int):
+        # Create an empty grid
+        self.grid = CustomGrid(width, height)
+        # Generate the surrounding walls
+        self.grid.wall_rect(0, 0, width, height)
 
-        if hard_reset:
-            # Create an empty grid
-            self.grid = CustomGrid(width, height)
-            # Generate the surrounding walls
-            self.grid.wall_rect(0, 0, width, height)
-
-            # TODO generate random walls
-            num_blocks = np.random.randint(1, 4)
-            for _ in range(num_blocks):
-                # 50% chance of a vertical wall
-                if np.random.uniform() > 0.5:
-                    x = np.random.randint(1, width - 2)
-                    y1 = np.random.randint(1, height - 2)
-                    y2 = np.random.randint(1, height - 2)
-                    self.grid.vert_wall(x, min(y1, y2), abs(y2 - y1) + 1)
-                else:
-                    y = np.random.randint(1, height - 2)
-                    x1 = np.random.randint(1, width - 2)
-                    x2 = np.random.randint(1, width - 2)
-                    self.grid.horz_wall(min(x1, x2), y, abs(x2 - x1) + 1)
+        # TODO generate random walls
+        num_blocks = np.random.randint(1, 4)
+        for _ in range(num_blocks):
+            # 50% chance of a vertical wall
+            if np.random.uniform() > 0.5:
+                x = np.random.randint(1, width - 2)
+                y1 = np.random.randint(1, height - 2)
+                y2 = np.random.randint(1, height - 2)
+                self.grid.vert_wall(x, min(y1, y2), abs(y2 - y1) + 1)
+            else:
+                y = np.random.randint(1, height - 2)
+                x1 = np.random.randint(1, width - 2)
+                x2 = np.random.randint(1, width - 2)
+                self.grid.horz_wall(min(x1, x2), y, abs(x2 - x1) + 1)
 
 
-            # Place the goals
-            for color in self.goal_map.keys():
-                self.place_obj(Goal(color))
+        # Place the goals
+        for color in self.goal_map.keys():
+            self.place_obj(Goal(color))
 
-            self.mission = self._gen_mission()
+        self.mission = self._gen_mission()
 
-        # Place the agent
+        # Place the agent in random position
         self.place_agent()
+
 
 
     def _reward(self, action) -> tuple[float, bool, dict]:

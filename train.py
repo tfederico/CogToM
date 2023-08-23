@@ -4,7 +4,7 @@ import numpy as np
 from cogtom.rl.policy import Policy
 from tqdm import tqdm
 import json
-from cogtom.utils.saving import save_q_table
+from cogtom.utils.saving import save_q_table, save_gridworld, save_q_table_image
 from cogtom.utils.plotting import plot_training_results, plot_q_table
 
 # hyperparameters
@@ -14,7 +14,7 @@ EPSILON = 0.1
 DISCOUNT = 0.95
 MAX_STEPS = 30
 SIZE = 11
-N_AGENTS = 1
+N_AGENTS = 100
 N_PAST = 1
 
 
@@ -45,10 +45,10 @@ def train_agent(env, policy):
     # env = gym.wrappers.RecordEpisodeStatistics(env, deque_size=N_EPISODES)
     first_actions = []
     consumed_goals = []
-    for _ in tqdm(range(N_EPISODES)):
+    for _ in range(N_EPISODES):
         env.reset()
         first_action, consumed_goal = train_one_episode(env, policy)
-        consumed_goals.append(consumed_goal)
+        consumed_goals.append(consumed_goal if consumed_goal else -1)
         first_actions.append(first_action)
 
     if len(consumed_goals) > 0:
@@ -76,14 +76,13 @@ def train():
 
     goal_consumed_rate = np.zeros(num_goal)
 
-    for a in range(N_AGENTS):
+    for a in tqdm(range(N_AGENTS)):
 
         env.reset(hard_reset=True)
+        save_gridworld(f"images/agent/agent_{a}_world.png", env)
 
         policy.init_q_table(env.width, env.height, env.action_space.n)
         for _ in range(N_PAST):
-            # reset position of the agent
-            env.place_agent((1, 1)) # TODO: replace with initial position
             env, policy, first_actions, rate = train_agent(env, policy)
             goal_consumed_rate += rate/N_PAST
         # plot_training_results(env, policy)
@@ -92,14 +91,15 @@ def train():
         g = np.argmax(goal_consumed_rate)
         outcome_observed[g] = 1
 
-        print("Outcome observed: ", outcome_observed)
-        # # enable manual control for testing
+        # print("Outcome observed: ", outcome_observed)
+
+        # enable manual control for testing
         # manual_control = CustomManualControl(env, seed=42)
         # manual_control.start()
 
         save_q_table(policy.q_values, "q_table.json")
 
-        plot_q_table(policy.q_values, SIZE)
+        save_q_table_image(f"images/q_table/agent_{a}_q_table.png", policy.q_values, SIZE)
 
     print("Goal consumed rate: ", goal_consumed_rate)
     env.close()

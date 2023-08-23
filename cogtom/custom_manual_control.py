@@ -29,7 +29,6 @@ class CustomManualControl(ManualControl):
             "right": Actions.right,
             "up": Actions.up,
             "down": Actions.down,
-            "enter": Actions.done,
         }
         if key in key_to_action.keys():
             action = key_to_action[key]
