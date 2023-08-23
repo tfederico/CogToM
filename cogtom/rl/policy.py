@@ -38,14 +38,6 @@ class Policy:
             for j in range(1, env_height - 1):
                 self.q_values[(i, j)] = np.zeros(action_space_n)
 
-        # # initialize the q_values for the walls to -inf
-        # for i in range(env_width):
-        #     self.q_values[(i, 0)][Actions.up] = -np.inf
-        #     self.q_values[(i, env_height - 1)][Actions.down] = -np.inf
-        # for j in range(env_height):
-        #     self.q_values[(0, j)][Actions.left] = -np.inf
-        #     self.q_values[(env_width - 1, j)][Actions.right] = -np.inf
-
     def get_action(self, action_space: Space, current_pos: int) -> int:
         """
         Returns the best action with probability (1 - EPSILON)
@@ -80,3 +72,4 @@ class Policy:
             self.q_values[obs][action] + self.lr * temporal_difference
         )
         self.training_error.append(temporal_difference)
+
