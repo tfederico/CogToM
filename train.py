@@ -7,6 +7,9 @@ import json
 from cogtom.utils.saving import save_q_table, save_gridworld, save_q_table_image
 from cogtom.utils.plotting import plot_training_results, plot_q_table
 from gymnasium import Env
+import warnings
+warnings.filterwarnings("error")
+
 
 # hyperparameters
 LR = 0.1
@@ -24,11 +27,11 @@ def train_one_episode(env: Env, policy: Policy) -> tuple[list, int]:
     trajectory = []
     # play one episode
     while not done:
-        pos = env.agent_pos
+        pos = env.get_wrapper_attr("agent_pos")
         action = policy.get_action(env.action_space, pos)
 
         next_obs, reward, terminated, truncated, info = env.step(action)
-        new_pos = env.agent_pos
+        new_pos = env.get_wrapper_attr("agent_pos")
 
         # update the agent
         policy.update(pos, new_pos, action, reward, terminated)
@@ -43,7 +46,7 @@ def train_one_episode(env: Env, policy: Policy) -> tuple[list, int]:
     return trajectory, info["consumed_goal"]
 
 
-def train_agent(env: Env, policy: Policy) -> tuple[Env, Policy, list, list]:
+def train_agent(env: Env, policy: Policy) -> tuple[Env, Policy, list[list], np.ndarray]:
     # env = gym.wrappers.RecordEpisodeStatistics(env, deque_size=N_EPISODES)
     trajectories = []
     consumed_goals = []
@@ -53,23 +56,25 @@ def train_agent(env: Env, policy: Policy) -> tuple[Env, Policy, list, list]:
         consumed_goals.append(consumed_goal)  # -1 means no goal consumed, important!
         trajectories.append(trajectory)
 
-    if len(consumed_goals) > 0:
-        rate = [consumed_goals.count(i) for i in env.goal_map.keys()]
+    goal_map = env.get_wrapper_attr("goal_map")
+
+    if len(consumed_goals) > 0 and (consumed_goals.count(None) != len(consumed_goals)):
+        rate = [consumed_goals.count(i) for i in goal_map.keys()]
         rate = np.array(rate)/sum(rate)
     else:
-        rate = np.random.dirichlet(alpha=(3,)*len(env.goal_map))
+        rate = np.random.dirichlet(alpha=(3,)*len(goal_map))
 
     return env, policy, trajectories, rate
 
 
-def extract_trajecotory(init_pos: tuple, env: Env, q_table: dict) -> tuple[list, int]:
+def extract_trajectory(init_pos: tuple, env: Env, q_table: dict) -> tuple[list, int]:
     trajectory = []
     pos = init_pos
     env.reset()
     while True:
         action = int(np.random.choice(np.argwhere(q_table[pos] == np.amax(q_table[pos])).flatten()))
         next_obs, reward, terminated, truncated, info = env.step(action)
-        new_pos = env.agent_pos
+        new_pos = env.get_wrapper_attr("agent_pos")
         trajectory.append((pos, action if pos != new_pos else 4))  # 4 means bumping into the wall TODO check why important
         pos = new_pos
         if terminated or truncated:
@@ -100,7 +105,7 @@ def train():
         past_env.reset(hard_reset=True)
         save_gridworld(f"images/agent/agent_{a}_world.png", past_env)
 
-        policy.init_q_table(past_env.width, past_env.height, past_env.action_space.n)
+        policy.init_q_table(past_env.get_wrapper_attr("width"), past_env.get_wrapper_attr("height"), past_env.action_space.n)
 
         for _ in range(N_PAST):
             past_env, policy, past_trajectories, past_rate = train_agent(past_env, policy)
@@ -116,14 +121,14 @@ def train():
         # print("Outcome observed: ", outcome_observed)
 
         current_env.reset(hard_reset=True)
-        policy.init_q_table(current_env.width, current_env.height, current_env.action_space.n)
+        policy.init_q_table(current_env.get_wrapper_attr("width"), current_env.get_wrapper_attr("height"), current_env.action_space.n)
 
-        init_pos = current_env.agent_pos
+        init_pos = current_env.get_wrapper_attr("agent_pos")
         current_env, policy, current_trajectories, current_rate = train_agent(current_env, policy)
 
         current_q_table = policy.q_values.copy()
 
-        true_trajectory, true_goal_consumed = extract_trajecotory(init_pos, current_env, current_q_table)
+        true_trajectory, true_goal_consumed = extract_trajectory(init_pos, current_env, current_q_table)
         past_first_action = past_trajectories[0][0][1]
         true_first_action = true_trajectory[0][1]
 
