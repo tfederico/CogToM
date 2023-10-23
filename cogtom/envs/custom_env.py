@@ -17,13 +17,14 @@ from minigrid.core.constants import COLOR_NAMES, TILE_PIXELS
 from cogtom.core.custom_grid import CustomGrid
 from minigrid.core.mission import MissionSpace
 from minigrid.core.world_object import Point, WorldObj
+from cogtom.utils.dfs import Graph
 
 T = TypeVar("T")
 
 
 class CustomMiniGridEnv(gym.Env):
     """
-    2D grid world game environment
+    2D grid env game environment
     """
 
     metadata = {
@@ -128,8 +129,13 @@ class CustomMiniGridEnv(gym.Env):
         self.agent_pos = (-1, -1)
 
         if hard_reset:
-            # Generate a new random grid
-            self._gen_grid(self.width, self.height)
+            valid_world = False
+            while not valid_world:
+                # Generate a new random grid
+                self._gen_grid(self.width, self.height)
+                self.place_agent()
+                # valid_world = self._check_valid_world()
+                valid_world = True # TODO decide if check or not for valid world
             self.agent_init_pos = self.agent_pos
         else:
             self.agent_pos = self.agent_init_pos
@@ -222,7 +228,7 @@ class CustomMiniGridEnv(gym.Env):
         return output
 
     @abstractmethod
-    def _gen_grid(self, width: int, height: int, hard_reset: bool = False):
+    def _gen_grid(self, width: int, height: int):
         pass
 
     def _reward(self, action) -> tuple[float, bool, dict]:
@@ -549,7 +555,7 @@ class CustomMiniGridEnv(gym.Env):
         # Compute which cells are visible to the agent
         _, vis_mask = self.gen_obs_grid()
 
-        # Compute the world coordinates of the top-left corner
+        # Compute the env coordinates of the top-left corner
         # of the agent's view area
 
         top_left = (
@@ -567,7 +573,7 @@ class CustomMiniGridEnv(gym.Env):
                 if not vis_mask[vis_i, vis_j]:
                     continue
 
-                # Compute the world coordinates of this cell
+                # Compute the env coordinates of this cell
                 abs_i, abs_j = top_left[0] + vis_i, top_left[1] + vis_j
 
                 if abs_i < 0 or abs_i >= self.width:
@@ -662,3 +668,29 @@ class CustomMiniGridEnv(gym.Env):
     def close(self):
         if self.window:
             pygame.quit()
+
+    def change_render_mode(self, mode):
+        self.render_mode = mode
+
+    def _check_valid_world(self):
+        world = np.ones((self.width, self.height), dtype=np.int8)
+
+        for wall in self.walls:
+            world[wall] = 0
+
+        g = Graph(self.width, self.height, world)
+        n, islands = g.countIslands()
+
+        valid_world = False
+
+        for island in islands:
+            agent_in = self.agent_pos in island
+            goals_in = [goal_pos in island for _, goal_pos in self.goals.items()]
+            if agent_in and all(goals_in):
+                valid_world = True
+                break
+
+        # check if the agent and all the goals are in the same island
+        return valid_world
+
+

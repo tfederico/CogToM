@@ -22,6 +22,8 @@ class SimpleEnv(CustomMiniGridEnv):
         mission_space = MissionSpace(mission_func=self._gen_mission)
         assert all([g in COLOR_NAMES for g in goal_map.keys()])
         self.goal_map = goal_map
+        self.goals = None
+        self.walls = None
 
         super().__init__(
             mission_space=mission_space,
@@ -43,7 +45,10 @@ class SimpleEnv(CustomMiniGridEnv):
         # Generate the surrounding walls
         self.grid.wall_rect(0, 0, width, height)
 
-        # TODO generate random walls
+        self.goals = {}
+        self.walls = []
+
+        # generate random walls
         num_blocks = np.random.randint(1, 4)
         for _ in range(num_blocks):
             # 50% chance of a vertical wall
@@ -58,15 +63,20 @@ class SimpleEnv(CustomMiniGridEnv):
                 x2 = np.random.randint(1, width - 2)
                 self.grid.horz_wall(min(x1, x2), y, abs(x2 - x1) + 1)
 
-
         # Place the goals
         for color in self.goal_map.keys():
-            self.place_obj(Goal(color))
+            pos = self.place_obj(Goal(color))
+            self.goals[color] = pos
+
+        # Save walls positions
+        for i in range(width):
+            for j in range(height):
+                if self.grid.get(i, j) is not None and self.grid.get(i, j).type == "wall":
+                    self.walls.append((i, j))
 
         self.mission = self._gen_mission()
+        # Note: agent placement is handled by the outer env
 
-        # Place the agent in random position
-        self.place_agent()
 
     def _reward(self, action: Actions) -> tuple[float, bool, dict]:
         reward = 0
@@ -91,3 +101,9 @@ class SimpleEnv(CustomMiniGridEnv):
             terminated = True
 
         return reward, terminated, info
+
+    def get_goals(self) -> Any:
+        return self.goals
+
+    def get_walls(self) -> Any:
+        return self.walls
