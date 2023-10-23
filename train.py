@@ -11,7 +11,6 @@ from cogtom.utils.saving import save_q_table, save_gridworld, save_q_table_image
 from cogtom.utils.plotting import plot_training_results, plot_q_table
 from gymnasium import Env
 from cogtom.ibl.ibl_observer import IBLObserver
-
 import math
 
 
@@ -33,7 +32,6 @@ def train_one_episode(env: Env, agent: Policy) -> tuple[list, int]:
     while not done:
         pos = env.agent_pos
         action = agent.get_action(env.action_space, pos)
-
         next_obs, reward, terminated, truncated, info = env.step(action)
         new_pos = env.agent_pos
 
@@ -65,11 +63,13 @@ def train_agent(env: Env, agent: Policy | IBLObserver) -> tuple[
         consumed_goals.append(consumed_goal if consumed_goal is not None else -1)  # -1 means no goal consumed, important!
         trajectories.append(trajectory)
 
-    if len(consumed_goals) > 0:
-        rate = [consumed_goals.count(i) for i in env.goal_map.keys()]
+    goal_map = env.goal_map
+
+    if len(consumed_goals) > 0 and (consumed_goals.count(None) != len(consumed_goals)):
+        rate = [consumed_goals.count(i) for i in goal_map.keys()]
         rate = np.array(rate)/sum(rate)
     else:
-        rate = np.random.dirichlet(alpha=(3,)*len(env.goal_map))
+        rate = np.random.dirichlet(alpha=(3,)*len(goal_map))
 
     return env, agent, trajectories, rate, consumed_goals
 
