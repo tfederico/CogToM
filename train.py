@@ -10,7 +10,7 @@ import json
 from cogtom.utils.saving import save_q_table, save_gridworld, save_q_table_image
 from cogtom.utils.plotting import plot_training_results, plot_q_table
 from gymnasium import Env
-from cogtom.ibl.ibl_observer import IBLObserver
+from cogtom.ibl.ibl_agent import IBLAgent
 import math
 
 
@@ -48,8 +48,8 @@ def train_one_episode(env: Env, agent: Policy) -> tuple[list, int]:
     return trajectory, info["consumed_goal"]
 
 
-def train_agent(env: Env, agent: Policy | IBLObserver) -> tuple[
-    Env, Policy | IBLObserver, list[list], ndarray | Any, list[int]]:
+def train_agent(env: Env, agent: Policy | IBLAgent) -> tuple[
+    Env, Policy | IBLAgent, list[list], ndarray | Any, list[int]]:
     # env = gym.wrappers.RecordEpisodeStatistics(env, deque_size=N_EPISODES)
     trajectories = []
     consumed_goals = []
@@ -123,7 +123,7 @@ def train():
         past_env.reset(hard_reset=True)
         save_gridworld(f"images/agent/agent_{a}_world.png", past_env)
 
-        ibl_observer = IBLObserver(past_env, 0.1, goal_map)
+        ibl_agent = IBLAgent(past_env, 0.1, goal_map)
 
         policy.init_q_table(past_env.width, past_env.height, past_env.action_space.n)
 
@@ -153,11 +153,11 @@ def train():
 
         current_env.reset()
 
-        ibl_observer.add_world(current_env)
-        ibl_observer.add_outcome(list(goal_map.values())[g])
+        ibl_agent.add_world(current_env)
+        ibl_agent.add_outcome(list(goal_map.values())[g])
 
         # run IBL
-        current_env, ibl_observer, trajectories_ibl, rate_ibl, goal_consumed_ibl = train_agent(current_env, ibl_observer)
+        current_env, ibl_agent, trajectories_ibl, rate_ibl, goal_consumed_ibl = train_agent(current_env, ibl_agent)
 
         first_action_predicted = [t[0][1] for t in trajectories_ibl]
 
@@ -166,10 +166,10 @@ def train():
         detailed_results["goal_consumed"][a] = sum([gl == true_goal_consumed for gl in goal_consumed_ibl]) / N_EPISODES
         detailed_results["first_action"][a] = sum(np.array(first_action_predicted) == true_first_action) / N_EPISODES
 
-        predicted_trajectory = ibl_observer.trajectory
-        predicted_actions = ibl_observer.action_history
+        predicted_trajectory = ibl_agent.trajectory
+        predicted_actions = ibl_agent.action_history
 
-        # utility.plot_grid(current_grid, predicted_trajectory, "IBLObserver prediction")
+        # utility.plot_grid(current_grid, predicted_trajectory, "IBLAgent prediction")
 
         goal_prob, _ = np.histogram([list(goal_map.keys()).index(g) if g != -1 else -1 for g in goal_consumed_ibl],
                                     bins=range(5), density=True)
