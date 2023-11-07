@@ -5,7 +5,7 @@ from typing import Tuple
 
 class IBLAgent(Agent):
     def __init__(self, env, default_utility, goal_map):
-        super(IBLAgent, self).__init__(name="My Agent", attributes=["action", "state_x", "state_y"], default_utility=default_utility)
+        super(IBLAgent, self).__init__(name="IBLAgent", attributes=["action", "state_x", "state_y"], default_utility=default_utility)
         self.goal = None
         self.action_pool = Actions.get_actions_vector()
         self.actions = len(self.action_pool)
@@ -91,7 +91,7 @@ class IBLAgent(Agent):
             if self.action_history[i] == 4:
                 delay[i].update(-0.05)
             else:
-                if self.last_goal_consumed:
+                if self.last_goal_consumed: # TODO double check if this is correct
                     delay[i].update(self.goal_map[self.last_goal_consumed]["reward"])
                 else:
                     delay[i].update(-0.01)
