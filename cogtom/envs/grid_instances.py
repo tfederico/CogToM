@@ -77,7 +77,6 @@ class SimpleEnv(CustomMiniGridEnv):
         self.mission = self._gen_mission()
         # Note: agent placement is handled by the outer env
 
-
     def _reward(self, action: Actions) -> tuple[float, bool, dict]:
         reward = 0
         terminated = False

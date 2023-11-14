@@ -476,9 +476,9 @@ class CustomMiniGridEnv(gym.Env):
 
         if action in set(Actions):
             reward, terminated, info = self._reward(action)
-        # Done action (not used by default)
-        elif action == self.actions.done:
-            pass
+        # # Done action (not used by default)
+        # elif action == self.actions.done:
+        #     pass
         else:
             raise ValueError(f"Unknown action: {action}")
 

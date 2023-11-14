@@ -86,7 +86,7 @@ def extract_trajectory(init_pos: tuple, env: Env, q_table: dict) -> tuple[list, 
         pos = new_pos
         if terminated or truncated:
             break
-    trajectory.append((next_obs, None))
+    trajectory.append((new_pos, None))
     return trajectory, info["consumed_goal"]
 
 
@@ -123,7 +123,7 @@ def train():
         past_env.reset(hard_reset=True)
         save_gridworld(f"images/agent/agent_{a}_world.png", past_env)
 
-        ibl_agent = IBLAgent(past_env, 0.1, goal_map)
+        ibl_observer = IBLAgent(past_env, 0.1, goal_map)
 
         policy.init_q_table(past_env.width, past_env.height, past_env.action_space.n)
 
@@ -153,11 +153,11 @@ def train():
 
         current_env.reset()
 
-        ibl_agent.add_world(current_env)
-        ibl_agent.add_outcome(list(goal_map.values())[g])
+        ibl_observer.add_world(current_env)
+        ibl_observer.add_outcome(list(goal_map.values())[g])
 
         # run IBL
-        current_env, ibl_agent, trajectories_ibl, rate_ibl, goal_consumed_ibl = train_agent(current_env, ibl_agent)
+        current_env, ibl_observer, trajectories_ibl, rate_ibl, goal_consumed_ibl = train_agent(current_env, ibl_observer)
 
         first_action_predicted = [t[0][1] for t in trajectories_ibl]
 
@@ -166,8 +166,8 @@ def train():
         detailed_results["goal_consumed"][a] = sum([gl == true_goal_consumed for gl in goal_consumed_ibl]) / N_EPISODES
         detailed_results["first_action"][a] = sum(np.array(first_action_predicted) == true_first_action) / N_EPISODES
 
-        predicted_trajectory = ibl_agent.trajectory
-        predicted_actions = ibl_agent.action_history
+        predicted_trajectory = ibl_observer.trajectory
+        predicted_actions = ibl_observer.action_history
 
         # utility.plot_grid(current_grid, predicted_trajectory, "IBLAgent prediction")
 
