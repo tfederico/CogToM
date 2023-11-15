@@ -85,34 +85,34 @@ def test_ibl_observer():
                     for (state, action), r in zip(trajectory, reward):
                         observer.populate(choices=[{"action": action, "state_x": state[0], "state_y": state[1]}], outcome=r)
 
-                env.reset()
 
                 init_pos = env.agent_pos
-
                 action = agent.get_action(init_pos)
-                predicted_action, data = observer.get_action(init_pos)
+                predicted_action = observer.get_action(init_pos)
 
                 results.append(action == predicted_action)
                 observer.reset()
 
-            print(f"alpha: {alpha}, n_past: {n_past}, accuracy: {np.mean(results)} +/- {np.std(results)}")
+            print(f"alpha: {alpha}, n_past: {n_past}, accuracy: {np.mean(results)} +/- "
+                  f"{np.std(results)/np.sqrt(len(results))}")
             all_res[(alpha, n_past)] = (np.mean(results), np.std(results)/np.sqrt(len(results)))
 
     # plot using pyplot.fill_between
     fig, ax = plt.subplots()
-    for n_past in [0, 1, 5]:
-        alphas = [0.01,  0.03, 0.1, 1.0, 3.0]
+    alphas = [0.01, 0.03, 0.1, 1.0, 3.0]
 
-        ax.plot(alphas, [all_res[(alpha, n_past)][0] for alpha in alphas])
+    for n_past in [0, 1, 5]:
+        ax.plot(alphas, [all_res[(alpha, n_past)][0] for alpha in alphas], label=f"{n_past}")
         ax.fill_between(alphas, [all_res[(alpha, n_past)][0] - all_res[(alpha, n_past)][1] for alpha in alphas],
-                        [all_res[(alpha, n_past)][0] + all_res[(alpha, n_past)][1] for alpha in alphas], alpha=0.3)
+                        [all_res[(alpha, n_past)][0] + all_res[(alpha, n_past)][1] for alpha in alphas], alpha=0.3,
+                        label='_nolegend_')
 
     ax.set_xlabel("alpha")
     ax.set_ylabel("accuracy")
     ax.set_xscale("log")
     ax.set_xticks([0.01, 0.03, 0.1, 1.0, 3.0])
     ax.set_xticklabels(["0.01", "0.03", "0.1", "1.0", "3.0"])
-    ax.legend(["0", "", "1", "", "5"])
+    ax.legend(title="n_past")
     plt.ylim([0, 1])
     plt.show()
 

@@ -25,8 +25,8 @@ class IBLObserver(Agent):
         self.options = options
 
     def get_action(self, current_pos):
-        action_selected, data = self.choose(choices=self.options[current_pos], details=True)
-        return action_selected["action"], data
+        action_selected = self.choose(choices=self.options[current_pos])
+        return action_selected["action"]
 
     def update(self, *args, **kwargs):
         pass
