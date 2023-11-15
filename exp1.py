@@ -85,6 +85,7 @@ def test_ibl_observer():
                     for (state, action), r in zip(trajectory, reward):
                         observer.populate(choices=[{"action": action, "state_x": state[0], "state_y": state[1]}], outcome=r)
 
+                env.reset()
 
                 init_pos = env.agent_pos
                 action = agent.get_action(init_pos)
