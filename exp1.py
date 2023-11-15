@@ -43,7 +43,7 @@ def train_agent(env: Env, agent: RandomPolicy, n_past: int) -> tuple[Env, list[l
     consumed_goals = []
     rewards = []
     for _ in range(n_past):
-        env.reset()
+        env.reset(hard_reset=True)
 
         trajectory, consumed_goal, reward = train_one_episode(env, agent)
 
@@ -83,7 +83,7 @@ def test_ibl_observer():
 
                 for trajectory, reward in zip(trajectories, rewards):
                     for (state, action), r in zip(trajectory, reward):
-                        observer.populate(choices=[{"action": action, "state_x": state[0], "state_y": state[1]}], outcome=r)
+                        observer.populate(choices=[{"action": action, "state_x": state[0], "state_y": state[1]}], outcome=0)
 
                 env.reset()
 
