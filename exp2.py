@@ -103,8 +103,9 @@ def test_ibl_observer():
 
             env, trajectories, goals_consumed, rewards = train_agent(env, agent)
 
-            for (state, action), r in zip(trajectories[-1], rewards[-1]):
-                observer.populate(choices=[{"action": action, "state_x": state[0], "state_y": state[1]}], outcome=r)
+            for trajectory, reward in zip(trajectories, rewards):
+                for (state, action), r in zip(trajectory, reward):
+                    observer.populate(choices=[{"action": action, "state_x": state[0], "state_y": state[1]}], outcome=r)
 
             env.reset(hard_reset=True)
 
@@ -114,15 +115,12 @@ def test_ibl_observer():
             ibl_trajectory = []
             ibl_goal = None
 
-            init_pos = env.agent_pos
-
             for _ in range(MAX_STEPS):
 
                 pos = env.agent_pos
                 action = observer.get_action(pos)
                 next_obs, reward, terminated, truncated, info = env.step(action)
                 ibl_trajectory.append((pos, action))
-                pos = env.agent_pos
 
                 # check if the goal is consumed
                 if info["consumed_goal"] is not None:
