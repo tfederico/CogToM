@@ -46,7 +46,7 @@ class Policy:
 
         # with probability EPSILON return a random action to explore the environment
         if np.random.uniform(0, 1) < self.epsilon:
-            return action_space.sample()
+            return int(action_space.sample())
         # with probability (1 - EPSILON) act greedily (exploit)
         else:
             action_argmax = np.argwhere(self.q_values[current_pos] == np.amax(self.q_values[current_pos]))
